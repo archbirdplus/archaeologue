@@ -1,0 +1,14 @@
+{
+  "name": "archaeologue",
+  "version": "1.0.0",
+  "description": "Digs through discord servers and plots activity over time.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Archbirdplus",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.11.0"
+  }
+}
