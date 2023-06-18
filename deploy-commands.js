@@ -18,7 +18,6 @@ for(const file of commandFiles) {
 }
 
 const rest = new REST().setToken(token);
-console.log("auth?");
 
 (async () => {
     try {
