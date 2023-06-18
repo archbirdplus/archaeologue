@@ -9,11 +9,23 @@ const path = require('node:path')
                 onDay day -> count
                 push snowflake => <updates>
             }
-            channelRecency channel -> timestamp
-            pushUserMessage user snowflake -> <updates>
+            pushMessage user snowflake -> <updates>
         }
         write => <save file>
     }
+*/
+
+/* file 1239023.json
+{
+    "@12388348": {
+        "10": [132030239392],
+        "12": [202340943904, 1280238230, 2390092309]
+    },
+    "@43894392": {
+        "0": [],
+        "1": [202340943904, 1280238230, 2390092309]
+    }
+}
 */
 
 class UserMessages {
@@ -31,6 +43,9 @@ class UserMessages {
         this.data[day].push(snowflake)
         return true
     }
+    getObject() {
+        return this.data
+    }
 }
 
 class GuildData {
@@ -39,9 +54,6 @@ class GuildData {
     constructor(obj) {
         this.data = obj
     }
-    channelRecency(channel) {
-        return this.data['#'+channel]?.recency
-    }
     userMessages(user) {
         const key = '@'+user
         if(!this.cache[key]) {
@@ -49,13 +61,20 @@ class GuildData {
         }
         return this.cache[key]
     }
-    pushMessage(user, channel, snowflake) {
-        this.userMessages(user).push(snowflake)
+    pushMessage(user, snowflake) {
+        return this.userMessages(user).push(snowflake)
+    }
+    getObject() {
+        const object = {}
+        Object.keys(this.cache).forEach(key => {
+            object[key] = this.cache[key]?.data ?? this.data[key]
+        })
+        return object
     }
 }
 
 const base = {
-    dir: path.join(appRoot, 'data')
+    dir: path.join(appRoot, 'data'),
     cache: {},
     data: {},
     getGuild(guild) {
@@ -70,7 +89,7 @@ const base = {
         Object.keys(this.cache).forEach(key => {
             fs.writeFileSync(
                 path.join(this.dir, guild+'.json'),
-                JSON.stringify(cache)
+                JSON.stringify(this.cache[key]?.getObject() ?? this.data[key])
             )
         })
     }
