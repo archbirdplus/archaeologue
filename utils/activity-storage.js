@@ -28,6 +28,15 @@ const path = require('node:path')
 }
 */
 
+function getDay(snowflake) {
+    const day = Math.floor(Number(BigInt(snowflake) >> BigInt(22))/(1000*60*60*24))
+    return day
+}
+
+function timestamp(snowflake) {
+    return (snowflake >> (22))
+}
+
 class UserMessages {
     data;
     constructor(obj) {
@@ -38,10 +47,10 @@ class UserMessages {
     }
     push(snowflake) {
         const day = 'd'+getDay(snowflake)
-        if(!this.data[day]) { this.data[day] = {} }
-        if(this.data[day].includes(snowflake)) { return false }
+        if(!this.data[day]) { this.data[day] = [] }
+        if(this.data[day].includes(snowflake)) { return true }
         this.data[day].push(snowflake)
-        return true
+        return false
     }
     getObject() {
         return this.data
@@ -51,8 +60,11 @@ class UserMessages {
 class GuildData {
     data;
     cache;
-    constructor(obj) {
+    file;
+    constructor(obj, file) {
         this.data = obj
+        this.cache = {}
+        this.file = file
     }
     userMessages(user) {
         const key = '@'+user
@@ -66,10 +78,18 @@ class GuildData {
     }
     getObject() {
         const object = {}
-        Object.keys(this.cache).forEach(key => {
-            object[key] = this.cache[key]?.data ?? this.data[key]
-        })
-        return object
+        console.log('[INFO] getObject')
+        const cacheData = {}
+        for(const key in this.cache) {
+            cacheData[key] = this.cache[key].data
+        }
+        const merged = Object.assign({}, this.data, cacheData)
+        return merged
+    }
+    async write() {
+        const json = JSON.stringify(this.getObject())
+        fs.writeFileSync(this.file+'', json, (err)=>console.log(`[ERROR] The writeFileSync error is`, err))
+        console.log(`[INFO] GuildData wrote to ${this.file}`)
     }
 }
 
@@ -80,18 +100,16 @@ const base = {
     getGuild(guild) {
         const key = '#'+guild
         if(!this.cache[key]) {
-            this.data[key] = require(path.join(this.dir, guild+'.json'))
-            this.cache[key] = new GuildData(this.data[key])
+            const file = path.join(this.dir, guild+'.json')
+            if(fs.existsSync(file)) {
+                this.data[key] = require(file)
+            } else { this.data[key] = {} }
+            this.cache[key] = new GuildData(this.data[key], file)
         }
         return this.cache[key]
     },
     write() {
-        Object.keys(this.cache).forEach(key => {
-            fs.writeFileSync(
-                path.join(this.dir, guild+'.json'),
-                JSON.stringify(this.cache[key]?.getObject() ?? this.data[key])
-            )
-        })
+        Object.values(this.cache).forEach(val => val.write())
     }
 }
 
