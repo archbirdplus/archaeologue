@@ -1,8 +1,8 @@
 # Archaeologue
 
-This is a discord bot that downloads all the messages in a discord server to plot users' activity (in messages per day) over time.
+Archaeologue is a discord bot that downloads all the messages in a discord server and plots users' activity (messages per day) over time.
 
-## Commands: 
+## Commands 
 
 `/help` - List the bot's commands
 

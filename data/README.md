@@ -1,6 +1,9 @@
-This directory stores automatically generated JSON files necessary to render plots of activity over time.
+The `data/` directory stores automatically generated JSON files necessary to render plots of activity over time.
 
-File structure:
+## File structure
+
 Each guild has its own file named after `<guild-id>.json`.
+
 Each file contains a top-level object with keys of `@<user-id>`.
-Each user object contains an object mapping keys of `d<days since discord epoch>` to an array of message snowflakes.
+
+Each user object contains an object mapping keys of `d<days since discord epoch>` to an array of snowflakes of the messages that the user sent on that day.
