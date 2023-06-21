@@ -3,6 +3,8 @@ const { clientId, token } = require('./config.json')
 const fs = require('node:fs')
 const path = require('node:path')
 
+global.appRoot = path.resolve(__dirname)
+
 const commands = []
 
 const commandsPath = path.join(__dirname, 'commands')

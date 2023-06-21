@@ -12,11 +12,15 @@ const updater = {
         while(true) {
             const messages = await channel.messages.fetch(options)
             console.log(`[INFO] Loaded batch of ${messages.size} messages`)
-            console.log('messages.some', messages.some)
+            let contentsLoaded = false
             let complete = false
             messages.forEach(msg => {
+                if(msg.content) { contentsLoaded = true; console.log(msg.content) }
                 if(guildData.pushMessage(msg.author.id, msg.id)) { complete = true }
             })
+            if(contentsLoaded) {
+                console.log('[WARNING] Excess bandwidth is being wasted on loading messages contents. Try removing some Intents or permissions.')
+            }
             if(complete || messages.size < 100) { break }
             options.before = messages.last().id
         }

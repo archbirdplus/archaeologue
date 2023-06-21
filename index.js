@@ -3,12 +3,12 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 global.appRoot = path.resolve(__dirname)
-global.storage = require('./utils/activity-storage.js')
+storage = require('./utils/activity-storage.js')
 
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js')
 const { token } = require('./config.json')
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] })
+const client = require('./client.js')
 
 client.commands = new Collection
 
