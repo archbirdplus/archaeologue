@@ -10,19 +10,24 @@ const updater = {
         }
         let options = { limit: 100 }
         while(true) {
-            const messages = await channel.messages.fetch(options)
-            console.log(`[INFO] Loaded batch of ${messages.size} messages`)
-            let contentsLoaded = false
-            let complete = false
-            messages.forEach(msg => {
-                if(msg.content) { contentsLoaded = true; console.log(msg.content) }
-                if(guildData.pushMessage(msg.author.id, msg.id)) { complete = true }
-            })
-            if(contentsLoaded) {
-                console.log('[WARNING] Excess bandwidth is being wasted on loading messages contents. Try removing some Intents or permissions.')
+            try {
+                const messages = await channel.messages.fetch(options)
+                console.log(`[INFO] Loaded batch of ${messages.size} messages (in ${channel.name})`)
+                let contentsLoaded = false
+                let complete = false
+                messages.forEach(msg => {
+                    if(msg.content) { contentsLoaded = true; console.error(msg.content) }
+                    if(guildData.pushMessage(msg.author.id, msg.id)) { complete = true }
+                })
+                if(contentsLoaded) {
+                    // console.log('[WARNING] Excess bandwidth is being wasted on loading messages contents. Try removing some Intents or permissions.')
+                }
+                if(complete || messages.size < 100) { break }
+                options.before = messages.last().id
+            } catch(e) {
+                console.log(`[WARNING] Channel ${channel.name} threw`, e, `whilst trying to fetch messages`)
+                break
             }
-            if(complete || messages.size < 100) { break }
-            options.before = messages.last().id
         }
         console.log(`[INFO] Up to date on channel ${channel.name}`)
     },

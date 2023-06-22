@@ -3,3 +3,4 @@ node_modules
 utils/old-storage.js
 data/*.json
 !data/README.md
+errors.txt
