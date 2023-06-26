@@ -19,10 +19,18 @@ module.exports = {
             updatingGuilds[key] = true
             await interaction.reply('This may take a while, hold on...')
             console.log('[INFO] Starting update.')
-            await updater.update(interaction.guild)
+            await updater.update(interaction.guild, async (resuming) => {
+                try {
+                    await interaction.followUp(resuming ?
+                        'Resuming progress since last interruption...' :
+                        'Scraping entire server from scratch...')
+                } catch(e) {
+                    console.log(`[ERROR] Failed to explain resuming status ${resuming}`, e)
+                }
+            })
             try {
                 console.log('[INFO] Editing reply to update request')
-                await interaction.editReply('Archaeologue is now up to date!')
+                await interaction.followUp('Archaeologue is now up to date!')
             } catch(e) {
                 console.log('[INFO] `editReply` window timed out, sending to channel ' + interaction.channel.name)
                 await interaction.channel.send('The update is done, but the `editReply` window timed out.')
