@@ -41,6 +41,12 @@ To start up the bot once it's set up, simply run:
 node .
 ```
 
+If you want to test changes in your test server before releasing your bot to the world, run:
+
+```
+node . test
+```
+
 ## Help me please
 
 I don't know how to stop the bot from downloading the message contents which I want to minimize anyways...

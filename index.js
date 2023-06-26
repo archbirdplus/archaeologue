@@ -1,4 +1,5 @@
 
+
 const fs = require('node:fs')
 const path = require('node:path')
 
@@ -6,7 +7,11 @@ global.appRoot = path.resolve(__dirname)
 storage = require('./utils/activity-storage.js')
 
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js')
-const { token } = require('./config.json')
+const { token, testGuild } = require('./config.json')
+const testGuildOnly = process.argv.slice(2).includes('test')
+if(testGuildOnly) {
+    console.log(`[INFO] Bot only active in the test guild, ${testGuild}.`)
+}
 
 const client = require('./client.js')
 
@@ -31,6 +36,10 @@ client.once("ready", c => {
 })
 
 client.on("interactionCreate", async interaction => {
+    if(testGuildOnly && interaction.guild.id != testGuild) {
+        console.log(`[WARNING] Ignored message from guild ${interaction.guild.name} due to being in test mode.`)
+        return
+    }
     log('[INFO] running command ' + interaction.commandName)
     const command = interaction.client.commands.get(interaction.commandName)
     if(!command) { log('[INFO] No command matches ' + interaction.commandName) }
