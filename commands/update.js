@@ -23,7 +23,7 @@ module.exports = {
                 try {
                     await interaction.followUp(resuming ?
                         'Resuming progress since last interruption...' :
-                        'Scraping entire server from scratch...')
+                        'Scraping all messages since last read...')
                 } catch(e) {
                     console.log(`[ERROR] Failed to explain resuming status ${resuming}`, e)
                 }
