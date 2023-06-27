@@ -30,8 +30,8 @@ plotter.plot = function(options) {
         })
     })
 
-    const start = options.start > 0 || options.start === 0 ? today - options.start : firstDay
-    const end = options.end > 0 || options.end === 0 ? today - options.end : lastDay
+    const start = options.start > 0 || options.start === 0 ? Math.max(0, today - options.start) : firstDay
+    const end = options.end > 0 || options.end === 0 ? Math.min(today, today - options.end) : lastDay
 
     const width = canvas.width
     const height = canvas.height
