@@ -3,7 +3,7 @@ const storage = require('./activity-storage.js')
 
 var plotter = {}
 plotter.plot = function(options) {
-    const canvas = Canvas.createCanvas(1280, 720)
+    const canvas = Canvas.createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
 
     const guildData = storage.getGuild(options.guild)
