@@ -10,11 +10,12 @@ const path = require('node:path')
                 push snowflake => <updates>
             }
             pushMessage user snowflake -> <updates>
+            allUsers() -> list of user ids
+            appendChannelUserMessages(channel, userMessagePairs) => <store progress>
+            lastChannelMessage(channel) -> last snowflake loaded
+            merge(guild, channel) => absorbs a .progress file into the guildData
         }
         write => <save file>
-        appendChannelUserMessages(channel, userMessagePairs) => <store progress>
-        lastChannelMessage(channel) -> last snowflake loaded
-        merge(guild, channel) => absorbs a .progress file into the guildData
     }
 */
 
@@ -36,8 +37,9 @@ function getDay(snowflake) {
     return day
 }
 
+// Get milliseconds since UNIX epoch, in order to compare with Date.now()
 function timestamp(snowflake) {
-    return Number(BigInt(snowflake) >> BigInt(22))
+    return Number(BigInt(snowflake) >> BigInt(22)) + 1420070400000
 }
 
 class UserMessages {
@@ -72,6 +74,15 @@ class GuildData {
         this.data = obj
         this.cache = {}
         this.file = file
+    }
+    allUsers() {
+        const object = {}
+        const cacheData = {}
+        for(const key in this.cache) {
+            cacheData[key] = this.cache[key].data
+        }
+        const merged = Object.assign({}, this.data, cacheData)
+        return Object.keys(merged).map(x => x.substring(1))
     }
     userMessages(user) {
         const key = '@'+user
