@@ -12,9 +12,9 @@ const path = require('node:path')
             pushMessage user snowflake -> <updates>
         }
         write => <save file>
-        channelProgress(channel, snowflake) => <store progress>
-        readChannelProgress(channel) -> last snowflake loaded
-        channelComplete(channel) => delete .last.json progress file
+        appendChannelUserMessages(channel, userMessagePairs) => <store progress>
+        lastChannelMessage(channel) -> last snowflake loaded
+        merge(guild, channel) => absorbs a .progress file into the guildData
     }
 */
 
@@ -37,7 +37,7 @@ function getDay(snowflake) {
 }
 
 function timestamp(snowflake) {
-    return (snowflake >> (22))
+    return Number(BigInt(snowflake) >> BigInt(22))
 }
 
 class UserMessages {
@@ -64,7 +64,11 @@ class GuildData {
     data;
     cache;
     file;
-    constructor(obj, file) {
+    dir;
+    streams;
+    constructor(dir, obj, file) {
+        this.dir = dir
+        this.streams = {}
         this.data = obj
         this.cache = {}
         this.file = file
@@ -94,6 +98,46 @@ class GuildData {
         fs.writeFileSync(this.file+'', json, (err)=>console.log(`[ERROR] The writeFileSync error is`, err))
         console.log(`[INFO] GuildData wrote to ${this.file}`)
     }
+    appendChannelUserMessages(channel, userMessagePairs) {
+        const key = channel + '.progress'
+        const url = path.join(this.dir, key)
+        const stream = this.streams[key] ??
+            fs.createWriteStream(url, { flags: 'a' })
+        stream.write(JSON.stringify(userMessagePairs)+'\n')
+    }
+    lastChannelMessage(channel) {
+        const key = channel + '.progress'
+        const file = path.join(this.dir, key)
+        if(!fs.existsSync(file)) { return undefined }
+        try {
+            // TODO: very sad to read the whole file just for the last snowflake
+            const contents = fs.readFileSync(file, 'utf8')+""
+            const rows = contents.trim().split('\n')
+            const row = JSON.parse(rows[rows.length-1])
+            // user id is not relevant
+            return row[row.length-1][1]
+        } catch(e) {
+            console.log(`[ERROR] Error reading progress file by lastChannelMessage in ${file}.`, e)
+            return undefined
+        }
+    }
+    merge(channel) {
+        const key = channel + '.progress'
+        const file = path.join(this.dir, key)
+        if(!fs.existsSync(file)) { return undefined }
+        try {
+            // TODO: very sad to read the whole file just for the last snowflake
+            const contents = fs.readFileSync(file, 'utf8')+""
+            const rows = contents.trim().split('\n')
+            const pairs = rows.map(JSON.parse).flat(1)
+            pairs.forEach(p => this.pushMessage(p[0], p[1]))
+            if(!fs.existsSync(file)) { return }
+            fs.unlink(file, (err)=>err ? console.log(`[ERROR] The unlink error for file ${file} is`, err) : console.log(`[INFO] Progress file ${file} successfully unlinked.`))
+        } catch(e) {
+            console.log(`[ERROR] Error merging progress file by merge in ${file}.`, e)
+            return undefined
+        }
+    }
 }
 
 const base = {
@@ -113,32 +157,12 @@ const base = {
                     this.data[key] = {}
                 }
             } else { this.data[key] = {} }
-            this.cache[key] = new GuildData(this.data[key], file)
+            this.cache[key] = new GuildData(this.dir, this.data[key], file)
         }
         return this.cache[key]
     },
     write() {
         Object.values(this.cache).forEach(val => val.write())
-    },
-    channelProgress(channel, snowflake) {
-        const file = path.join(this.dir, channel+'.last.json')
-        fs.writeFileSync(file, snowflake, (err)=>console.log(`[ERROR] The writeFileSync error is`, err))
-    },
-    readChannelProgress(channel) {
-        const file = path.join(this.dir, channel+'.last.json')
-        if(!fs.existsSync(file)) { return undefined }
-        try {
-            const snowflake = fs.readFileSync(file, 'utf8')+""
-            return snowflake
-        } catch(e) {
-            console.log(`[ERROR] Error reading existing channelProgress file ${file}.`)
-            return undefined
-        }
-    },
-    channelComplete(channel) {
-        const file = path.join(this.dir, channel+'.last.json')
-        if(!fs.existsSync(file)) { return }
-        fs.unlink(file, (err)=>err ? console.log(`[ERROR] The unlink error for file ${file} is`, err) : console.log(`[INFO] Progress file ${file} successfully unlinked.`))
     }
 }
 

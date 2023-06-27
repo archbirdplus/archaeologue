@@ -17,20 +17,20 @@ const updater = {
                 let complete = false
                 messages.forEach(msg => {
                     if(msg.content) { contentsLoaded = true; console.error(msg.content) }
-                    if(guildData.pushMessage(msg.author.id, msg.id)) { complete = true }
+                    // if(guildData.pushMessage(msg.author.id, msg.id)) { complete = true }
                 })
                 if(contentsLoaded) {
                     // console.log('[WARNING] Excess bandwidth is being wasted on loading messages contents. Try removing some Intents or permissions.')
                 }
                 if(complete || messages.size < 100) { break }
                 options.before = messages.last().id
-                storage.channelProgress(channel.id, options.before)
+                guildData.appendChannelUserMessages(channel.id, messages.map(msg => [msg.author.id, msg.id]))
             } catch(e) {
                 console.log(`[WARNING] Channel ${channel.name} threw`, e, `whilst trying to fetch messages`)
                 break
             }
         }
-        storage.channelComplete(channel.id)
+        guildData.merge(channel.id)
         console.log(`[INFO] Up to date on channel ${channel.name}`)
     },
     async update(guild, resumingCallback) {
@@ -40,7 +40,7 @@ const updater = {
                 // console.log('[INFO] channels:', channels)
         console.log(`[INFO] Fetching ${channels.size} channels`)
         var promises = []
-        const progresses = channels.map(channel => [channel, storage.readChannelProgress(channel.id)])
+        const progresses = channels.map(channel => [channel, guildData.lastChannelMessage(channel.id)])
         const resuming = progresses.some(x=>x[1])
         if(resuming) {
             progresses.forEach(pair => {
