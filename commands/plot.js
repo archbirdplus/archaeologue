@@ -21,7 +21,7 @@ module.exports = {
         var users = []
         const userString = opts.getString('users')
         if(userString) {
-            const regex = /<@(\d+)>/g
+            const regex = /(\d+)/g
             while(true) {
                 const ret = regex.exec(userString)
                 if(!ret) { break }
