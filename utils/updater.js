@@ -17,7 +17,7 @@ const updater = {
                 let complete = false
                 messages.forEach(msg => {
                     if(msg.content) { contentsLoaded = true; console.error(msg.content) }
-                    // if(guildData.pushMessage(msg.author.id, msg.id)) { complete = true }
+                    if(guildData.pushMessage(msg.author.id, msg.id)) { complete = true }
                 })
                 if(contentsLoaded) {
                     // console.log('[WARNING] Excess bandwidth is being wasted on loading messages contents. Try removing some Intents or permissions.')
