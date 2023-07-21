@@ -41,12 +41,17 @@ To start up the bot once it's set up, simply run:
 node .
 ```
 
-If you want to test changes in your test server before releasing your bot to the world, run:
+If you want to test changes in your test server before releasing your bot to the world, run the following command. This spawns another instance of Arch that only responds in the test server. Note that this might clash with the main instance.
 
 ```
 node . test
 ```
 
-## Help me please
+## Contributions
 
-I don't know how to stop the bot from downloading the message contents which I want to minimize anyways...
+Thanks to [@Reginald-Gillespie](https://github.com/Reginald-Gillespie) for finding an exploit.
+Thanks to [@EliasMurcray](https://github.com/EliasMurcray) for helping me with fetching usernames.
+
+## Contributing
+
+If you found a problem or a solution, open an issue or a pull request. I'll consider it when I'm notified. The primary problem I can't solve myself is how to get discord.js to fetch _only_ the message and user ID's, rather than wasting bandwidth on reading the message contents.

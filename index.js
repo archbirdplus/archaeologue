@@ -40,18 +40,21 @@ client.on("interactionCreate", async interaction => {
         console.log(`[WARNING] Ignored message from guild ${interaction.guild.name} due to being in test mode.`)
         return
     }
-    log('[INFO] running command ' + interaction.commandName)
-    const command = interaction.client.commands.get(interaction.commandName)
-    if(!command) { log('[INFO] No command matches ' + interaction.commandName) }
     try {
+        log('[INFO] running command ' + interaction.commandName)
+        const command = interaction.client.commands.get(interaction.commandName)
+        if(!command) { log('[INFO] No command matches ' + interaction.commandName) }
         await command.execute(interaction)
     } catch(error) {
         log('[ERROR]', error)
-        await (interaction.replied  || interaction.deferred ?
-                interaction.followUp :
-                interaction.reply)
-            .call(interaction,
-                { content: "Error while executing command!", ephemeral: true })
+        // this might throw as well, in particular with two instances of Arch
+        try {
+            await (interaction.replied  || interaction.deferred ?
+                    interaction.followUp :
+                    interaction.reply)
+                .call(interaction,
+                    { content: "Error while executing command!", ephemeral: true })
+        } catch(e) { }
     }
 })
 
