@@ -28,7 +28,7 @@ module.exports = {
                 users.push(ret[1])
             }
         }
-        const image = plotter.plot({ start: opts.getInteger('start'), end: opts.getInteger('end'), users: users, guild: interaction.guild.id })
+        const image = await plotter.plot({ start: opts.getInteger('start'), end: opts.getInteger('end'), users: users, guild: interaction.guild })
         const attachment = new AttachmentBuilder(image, 'your-graph.png')
         await interaction.editReply({ files: [attachment] })
         } catch(e) {
